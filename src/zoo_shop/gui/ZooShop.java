@@ -1,11 +1,12 @@
-package zoo_shop;
+package zoo_shop.gui;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+
+import zoo_shop.database.models.*;
 
 public class ZooShop {
     private JTabbedPane tabbed_pane_main;
@@ -43,7 +44,8 @@ public class ZooShop {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String name = ZooShop.this.text_field_species_name.getText();
-                JOptionPane.showMessageDialog(new JFrame("ZooShop"), name);
+                ZooShop.this.text_field_species_name.setText("");
+                Specie.create(name);
             }
         });
 

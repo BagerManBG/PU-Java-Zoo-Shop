@@ -54,6 +54,9 @@ public class ZooShop {
                     case 1:
                         ZooShop.this.switchTabAnimals();
                         break;
+                    case 2:
+                        ZooShop.this.switchTabClients();
+                        break;
                     default:
                         break;
                 }
@@ -99,7 +102,17 @@ public class ZooShop {
         button_add_clients.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String name = ZooShop.this.text_field_clients_name.getText();
+                ZooShop.this.text_field_clients_name.setText("");
 
+                String email = ZooShop.this.text_field_clients_email.getText();
+                ZooShop.this.text_field_clients_email.setText("");
+
+                String phone = ZooShop.this.text_field_clients_phone.getText();
+                ZooShop.this.text_field_clients_phone.setText("");
+
+                Client.create(name, email, phone);
+                ZooShop.this.switchTabClients();
             }
         });
 
@@ -321,5 +334,102 @@ public class ZooShop {
 
         this.panel_animals_list.revalidate();
         this.panel_animals_list.repaint();
+    }
+
+    // Create the list of clients
+    private void switchTabClients() {
+        Map<Integer, Client> clients = Client.loadAll();
+
+        this.panel_clients_list.removeAll();
+        this.panel_clients_list.setLayout(new BoxLayout(this.panel_clients_list, BoxLayout.Y_AXIS));
+
+        for(Map.Entry<Integer, Client> row : clients.entrySet()) {
+            Integer id = row.getKey();
+            Client client = row.getValue();
+
+            JPanel container = new JPanel();
+            JTextField name_text_field = new JTextField();
+            JTextField email_text_field = new JTextField();
+            JTextField phone_text_field = new JTextField();
+
+            JCheckBox trigger_editable = new JCheckBox("Enable Update");
+            JButton update_button = new JButton("Update");
+            JButton delete_button = new JButton("Delete");
+
+            update_button.setEnabled(false);
+
+            name_text_field.setEditable(false);
+            name_text_field.setText(client.getName());
+            name_text_field.setMaximumSize(new Dimension(255, 30));
+
+            email_text_field.setEditable(false);
+            email_text_field.setText(client.getEmail());
+            email_text_field.setMaximumSize(new Dimension(255, 30));
+
+            phone_text_field.setEditable(false);
+            phone_text_field.setText(client.getPhone());
+            phone_text_field.setMaximumSize(new Dimension(255, 30));
+
+            container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
+            container.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(name_text_field, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(email_text_field, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(phone_text_field, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(trigger_editable, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(update_button, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(delete_button, Component.LEFT_ALIGNMENT);
+
+            this.panel_clients_list.add(container, Component.LEFT_ALIGNMENT);
+
+            trigger_editable.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    update_button.setEnabled(!update_button.isEnabled());
+                    name_text_field.setEditable(!name_text_field.isEditable());
+                    email_text_field.setEditable(!email_text_field.isEditable());
+                    phone_text_field.setEditable(!phone_text_field.isEditable());
+                }
+            });
+
+            update_button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String cl_name = name_text_field.getText();
+                    client.setName(cl_name);
+
+                    String cl_email = email_text_field.getText();
+                    client.setEmail(cl_email);
+
+                    String cl_phone = phone_text_field.getText();
+                    client.setPhone(cl_phone);
+
+                    client.save();
+                    ZooShop.this.switchTabClients();
+                }
+            });
+
+            delete_button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    client.delete();
+                    ZooShop.this.switchTabClients();
+                }
+            });
+        }
+
+        this.panel_clients_list.revalidate();
+        this.panel_clients_list.repaint();
     }
 }

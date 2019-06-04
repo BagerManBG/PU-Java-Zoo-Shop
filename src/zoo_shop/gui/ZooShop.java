@@ -7,10 +7,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Map;
 
-import javafx.scene.layout.Border;
 import zoo_shop.database.models.*;
 import zoo_shop.tools.ComboItem;
 
@@ -35,13 +34,20 @@ public class ZooShop {
     private JPanel panel_animals_list;
     private JPanel panel_clients_list;
     private JPanel panel_adoptions_list;
-    private JPanel pane_species_list;
+    private JTextField species_search_name;
+    private JButton button_species_search;
+    private JTextField animals_search_name;
+    private JButton button_animals_search;
+    private JTextField clients_search_name;
+    private JButton button_clients_search;
+    private JButton button_adoptions_search;
+    private JTextField adoptions_search_client;
     private JFrame frame;
 
     public ZooShop(JFrame frame) {
         this.frame = frame;
         this.switchTabSpecies();
-        // On Tab Change Listener
+        // On Tab Change Listener.
         tabbed_pane_main.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -66,7 +72,7 @@ public class ZooShop {
             }
         });
 
-        // On Add Specie Button Click
+        // On Add Specie Button Click.
         button_add_species.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -78,7 +84,7 @@ public class ZooShop {
             }
         });
 
-        // On Add Animal Button Click
+        // On Add Animal Button Click.
         button_add_animals.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -100,7 +106,7 @@ public class ZooShop {
             }
         });
 
-        // On Add Client Button Click
+        // On Add Client Button Click.
         button_add_clients.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -118,7 +124,7 @@ public class ZooShop {
             }
         });
 
-        // On Add Adoption Button Click
+        // On Add Adoption Button Click.
         button_add_adoptions.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -150,6 +156,9 @@ public class ZooShop {
     // Create the list of species.
     private void switchTabSpecies() {
         Map<Integer, Specie> species = Specie.loadAll();
+        ArrayList<JPanel> containers = new ArrayList<>();
+
+        this.species_search_name.setText("");
 
         this.panel_species_list.removeAll();
         this.panel_species_list.setLayout(new BoxLayout(this.panel_species_list, BoxLayout.Y_AXIS));
@@ -187,6 +196,7 @@ public class ZooShop {
             container.add(delete_button, Component.LEFT_ALIGNMENT);
 
             this.panel_species_list.add(container, Component.LEFT_ALIGNMENT);
+            containers.add(container);
 
             trigger_editable.addActionListener(new ActionListener() {
                 @Override
@@ -215,6 +225,34 @@ public class ZooShop {
             });
         }
 
+        // Species Search.
+        button_species_search.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String search_name = ZooShop.this.species_search_name.getText();
+
+                for (JPanel container : containers) {
+                    container.setVisible(true);
+                }
+
+                if (!search_name.equals("")) {
+                    int index = 0;
+                    for(Map.Entry<Integer, Specie> row : species.entrySet()) {
+                        Integer id = row.getKey();
+                        Specie specie = row.getValue();
+
+                        if (!specie.getSpecie().contains(search_name)) {
+                            containers.get(index).setVisible(false);
+                        }
+                        index++;
+                    }
+                }
+
+                ZooShop.this.panel_species_list.revalidate();
+                ZooShop.this.panel_species_list.repaint();
+            }
+        });
+
         this.panel_species_list.revalidate();
         this.panel_species_list.repaint();
     }
@@ -223,6 +261,9 @@ public class ZooShop {
     private void switchTabAnimals() {
         Map<Integer, Animal> animals = Animal.loadAll();
         Map<Integer, Specie> species = Specie.loadAll();
+        ArrayList<JPanel> containers = new ArrayList<>();
+
+        this.animals_search_name.setText("");
 
         this.panel_animals_list.removeAll();
         this.panel_animals_list.setLayout(new BoxLayout(this.panel_animals_list, BoxLayout.Y_AXIS));
@@ -305,6 +346,7 @@ public class ZooShop {
             container.add(delete_button, Component.LEFT_ALIGNMENT);
 
             this.panel_animals_list.add(container, Component.LEFT_ALIGNMENT);
+            containers.add(container);
 
             trigger_editable.addActionListener(new ActionListener() {
                 @Override
@@ -343,6 +385,34 @@ public class ZooShop {
                     ZooShop.this.switchTabAnimals();
                 }
             });
+
+            // Animals Search.
+            button_animals_search.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String search_name = ZooShop.this.animals_search_name.getText();
+
+                    for (JPanel container : containers) {
+                        container.setVisible(true);
+                    }
+
+                    if (!search_name.equals("")) {
+                        int index = 0;
+                        for(Map.Entry<Integer, Animal> row : animals.entrySet()) {
+                            Integer id = row.getKey();
+                            Animal animal = row.getValue();
+
+                            if (!animal.getName().contains(search_name)) {
+                                containers.get(index).setVisible(false);
+                            }
+                            index++;
+                        }
+                    }
+
+                    ZooShop.this.panel_animals_list.revalidate();
+                    ZooShop.this.panel_animals_list.repaint();
+                }
+            });
         }
 
         this.panel_animals_list.revalidate();
@@ -352,6 +422,9 @@ public class ZooShop {
     // Create the list of clients
     private void switchTabClients() {
         Map<Integer, Client> clients = Client.loadAll();
+        ArrayList<JPanel> containers = new ArrayList<>();
+
+        this.clients_search_name.setText("");
 
         this.panel_clients_list.removeAll();
         this.panel_clients_list.setLayout(new BoxLayout(this.panel_clients_list, BoxLayout.Y_AXIS));
@@ -405,6 +478,7 @@ public class ZooShop {
             container.add(delete_button, Component.LEFT_ALIGNMENT);
 
             this.panel_clients_list.add(container, Component.LEFT_ALIGNMENT);
+            containers.add(container);
 
             trigger_editable.addActionListener(new ActionListener() {
                 @Override
@@ -440,6 +514,34 @@ public class ZooShop {
                     ZooShop.this.switchTabClients();
                 }
             });
+
+            // Clients Search.
+            button_clients_search.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String search_name = ZooShop.this.clients_search_name.getText();
+
+                    for (JPanel container : containers) {
+                        container.setVisible(true);
+                    }
+
+                    if (!search_name.equals("")) {
+                        int index = 0;
+                        for(Map.Entry<Integer, Client> row : clients.entrySet()) {
+                            Integer id = row.getKey();
+                            Client client = row.getValue();
+
+                            if (!client.getName().contains(search_name)) {
+                                containers.get(index).setVisible(false);
+                            }
+                            index++;
+                        }
+                    }
+
+                    ZooShop.this.panel_clients_list.revalidate();
+                    ZooShop.this.panel_clients_list.repaint();
+                }
+            });
         }
 
         this.panel_clients_list.revalidate();
@@ -451,6 +553,9 @@ public class ZooShop {
         Map<Integer, Adoption> adoptions = Adoption.loadAll();
         Map<Integer, Client> clients = Client.loadAll();
         Map<Integer, Animal> animals = Animal.loadAll();
+        ArrayList<JPanel> containers = new ArrayList<>();
+
+        this.adoptions_search_client.setText("");
 
         this.panel_adoptions_list.removeAll();
         this.panel_adoptions_list.setLayout(new BoxLayout(this.panel_adoptions_list, BoxLayout.Y_AXIS));
@@ -535,6 +640,7 @@ public class ZooShop {
             container.add(delete_button, Component.LEFT_ALIGNMENT);
 
             this.panel_adoptions_list.add(container, Component.LEFT_ALIGNMENT);
+            containers.add(container);
 
             trigger_editable.addActionListener(new ActionListener() {
                 @Override
@@ -567,6 +673,34 @@ public class ZooShop {
                 public void actionPerformed(ActionEvent e) {
                     adoption.delete();
                     ZooShop.this.switchTabAdoptions();
+                }
+            });
+
+            // Adoptions Search.
+            button_adoptions_search.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String search_name = ZooShop.this.adoptions_search_client.getText();
+
+                    for (JPanel container : containers) {
+                        container.setVisible(true);
+                    }
+
+                    if (!search_name.equals("")) {
+                        int index = 0;
+                        for(Map.Entry<Integer, Adoption> row : adoptions.entrySet()) {
+                            Integer id = row.getKey();
+                            Adoption adoption = row.getValue();
+
+                            if (!clients.get(adoption.getClient()).getName().contains(search_name)) {
+                                containers.get(index).setVisible(false);
+                            }
+                            index++;
+                        }
+                    }
+
+                    ZooShop.this.panel_adoptions_list.revalidate();
+                    ZooShop.this.panel_adoptions_list.repaint();
                 }
             });
         }

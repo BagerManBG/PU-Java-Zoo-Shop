@@ -126,6 +126,7 @@ public class Client {
 
     public static Map loadAll() {
         Map<Integer, Client> map = new HashMap<Integer, Client>();
+
         try {
             Connection con = ConnectionManager.getConnection();
             Statement stmt = con.createStatement();

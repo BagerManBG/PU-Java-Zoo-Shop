@@ -101,6 +101,7 @@ public class Specie {
 
     public static Map loadAll() {
         Map<Integer, Specie> map = new HashMap<Integer, Specie>();
+
         try {
             Connection con = ConnectionManager.getConnection();
             Statement stmt = con.createStatement();

@@ -141,6 +141,7 @@ public class Animal {
 
     public static Map loadAll() {
         Map<Integer, Animal> map = new HashMap<Integer, Animal>();
+
         try {
             Connection con = ConnectionManager.getConnection();
             Statement stmt = con.createStatement();

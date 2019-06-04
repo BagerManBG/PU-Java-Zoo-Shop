@@ -45,7 +45,7 @@ public class ZooShop {
         tabbed_pane_main.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                Integer index = tabbed_pane_main.getSelectedIndex();
+                int index = tabbed_pane_main.getSelectedIndex();
 
                 switch (index) {
                     case 0:
@@ -57,10 +57,12 @@ public class ZooShop {
                     case 2:
                         ZooShop.this.switchTabClients();
                         break;
+                    case 3:
+                        ZooShop.this.switchTabAdoptions();
+                        break;
                     default:
                         break;
                 }
-//                JOptionPane.showMessageDialog(new JFrame("ZooShop"), index);
             }
         });
 
@@ -120,7 +122,16 @@ public class ZooShop {
         button_add_adoptions.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Object client_obj = ZooShop.this.combo_box_adoptions_client.getSelectedItem();
+                Integer client = Integer.parseInt(((ComboItem) client_obj).getValue());
+                ZooShop.this.combo_box_adoptions_client.setSelectedIndex(0);
 
+                Object animal_obj = ZooShop.this.combo_box_adoptions_animal.getSelectedItem();
+                Integer animal = Integer.parseInt(((ComboItem) animal_obj).getValue());
+                ZooShop.this.combo_box_adoptions_animal.setSelectedIndex(0);
+
+                Adoption.create(client, animal);
+                ZooShop.this.switchTabAdoptions();
             }
         });
     }
@@ -215,6 +226,8 @@ public class ZooShop {
 
         this.panel_animals_list.removeAll();
         this.panel_animals_list.setLayout(new BoxLayout(this.panel_animals_list, BoxLayout.Y_AXIS));
+
+        combo_box_animals_species.removeAllItems();
 
         for(Map.Entry<Integer, Specie> row : species.entrySet()) {
             Integer id = row.getKey();
@@ -431,5 +444,134 @@ public class ZooShop {
 
         this.panel_clients_list.revalidate();
         this.panel_clients_list.repaint();
+    }
+
+    // Create the list of adoptions
+    private void switchTabAdoptions() {
+        Map<Integer, Adoption> adoptions = Adoption.loadAll();
+        Map<Integer, Client> clients = Client.loadAll();
+        Map<Integer, Animal> animals = Animal.loadAll();
+
+        this.panel_adoptions_list.removeAll();
+        this.panel_adoptions_list.setLayout(new BoxLayout(this.panel_adoptions_list, BoxLayout.Y_AXIS));
+
+        combo_box_adoptions_client.removeAllItems();
+        combo_box_adoptions_animal.removeAllItems();
+
+        for(Map.Entry<Integer, Client> row : clients.entrySet()) {
+            Integer id = row.getKey();
+            Client client = row.getValue();
+
+            this.combo_box_adoptions_client.addItem(new ComboItem(client.getName(), client.id().toString()));
+        }
+
+        for(Map.Entry<Integer, Animal> row : animals.entrySet()) {
+            Integer id = row.getKey();
+            Animal animal = row.getValue();
+
+            this.combo_box_adoptions_animal.addItem(new ComboItem(animal.getName(), animal.id().toString()));
+        }
+
+        for(Map.Entry<Integer, Adoption> row : adoptions.entrySet()) {
+            Integer id = row.getKey();
+            Adoption adoption = row.getValue();
+
+            Integer client_ref_index = null;
+            Integer animal_ref_index = null;
+
+            JPanel container = new JPanel();
+
+            JComboBox client_ref = new JComboBox();
+            JComboBox animal_ref = new JComboBox();
+
+            JCheckBox trigger_editable = new JCheckBox("Enable Update");
+            JButton update_button = new JButton("Update");
+            JButton delete_button = new JButton("Delete");
+
+            update_button.setEnabled(false);
+
+            for (int i = 0; i < this.combo_box_adoptions_client.getItemCount(); i++) {
+                ComboItem item = (ComboItem) this.combo_box_adoptions_client.getItemAt(i);
+                client_ref.addItem(item);
+
+                if (Integer.parseInt(item.getValue()) == adoption.getClient()) {
+                    client_ref_index = i;
+                }
+            }
+
+            client_ref.setEditable(false);
+            client_ref.setSelectedIndex(client_ref_index);
+            client_ref.setMaximumSize(new Dimension(150, 30));
+
+            for (int i = 0; i < this.combo_box_adoptions_animal.getItemCount(); i++) {
+                ComboItem item = (ComboItem) this.combo_box_adoptions_animal.getItemAt(i);
+                animal_ref.addItem(item);
+
+                if (Integer.parseInt(item.getValue()) == adoption.getAnimal()) {
+                    animal_ref_index = i;
+                }
+            }
+
+            animal_ref.setEditable(false);
+            animal_ref.setSelectedIndex(animal_ref_index);
+            animal_ref.setMaximumSize(new Dimension(150, 30));
+
+            container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
+            container.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(client_ref, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(animal_ref, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(trigger_editable, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(update_button, Component.LEFT_ALIGNMENT);
+
+            container.add(Box.createRigidArea(new Dimension(10,0)));
+            container.add(delete_button, Component.LEFT_ALIGNMENT);
+
+            this.panel_adoptions_list.add(container, Component.LEFT_ALIGNMENT);
+
+            trigger_editable.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    update_button.setEnabled(!update_button.isEnabled());
+                    client_ref.setEditable(!client_ref.isEditable());
+                    animal_ref.setEditable(!animal_ref.isEditable());
+                }
+            });
+
+            update_button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    Object ad_client_obj = client_ref.getSelectedItem();
+                    Integer ad_client = Integer.parseInt(((ComboItem) ad_client_obj).getValue());
+
+                    Object ad_animal_obj = animal_ref.getSelectedItem();
+                    Integer ad_animal = Integer.parseInt(((ComboItem) ad_animal_obj).getValue());
+
+                    adoption.setClient(ad_client);
+                    adoption.setAnimal(ad_animal);
+
+                    adoption.save();
+                    ZooShop.this.switchTabAdoptions();
+                }
+            });
+
+            delete_button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    adoption.delete();
+                    ZooShop.this.switchTabAdoptions();
+                }
+            });
+        }
+
+        this.panel_adoptions_list.revalidate();
+        this.panel_adoptions_list.repaint();
     }
 }

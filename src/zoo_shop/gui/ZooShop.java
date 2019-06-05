@@ -7,9 +7,13 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Map;
 
+import zoo_shop.database.ConnectionManager;
 import zoo_shop.database.models.*;
 import zoo_shop.tools.ComboItem;
 
@@ -42,6 +46,10 @@ public class ZooShop {
     private JButton button_clients_search;
     private JButton button_adoptions_search;
     private JTextField adoptions_search_client;
+    private JTextField global_search_animal_name;
+    private JTextField global_search_client_name;
+    private JButton button_global_search;
+    private JPanel panel_global_search;
     private JFrame frame;
 
     public ZooShop(JFrame frame) {
@@ -65,6 +73,9 @@ public class ZooShop {
                         break;
                     case 3:
                         ZooShop.this.switchTabAdoptions();
+                        break;
+                    case 4:
+                        ZooShop.this.switchTabGlobalSearch();
                         break;
                     default:
                         break;
@@ -707,5 +718,107 @@ public class ZooShop {
 
         this.panel_adoptions_list.revalidate();
         this.panel_adoptions_list.repaint();
+    }
+
+    private void switchTabGlobalSearch() {
+        this.panel_global_search.removeAll();
+        this.panel_global_search.setLayout(new BoxLayout(this.panel_global_search, BoxLayout.Y_AXIS));
+
+        button_global_search.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ZooShop.this.panel_global_search.removeAll();
+
+                String search_animal = ZooShop.this.global_search_animal_name.getText();
+                String search_client = ZooShop.this.global_search_client_name.getText();
+
+                boolean search_animal_empty = search_animal.equals("");
+                boolean search_client_empty = search_client.equals("");
+
+                if (!search_animal_empty || !search_client_empty) {
+
+                    String query = "SELECT * FROM adoptions";
+                    query += " INNER JOIN animals ON adoptions.animal = animals.id";
+                    query += " INNER JOIN clients ON adoptions.client = clients.id";
+                    query += " INNER JOIN animal_species ON animals.specie = animal_species.id";
+                    query += " WHERE 1=1";
+
+                    if (!search_animal_empty)
+                        query += " AND animals.name LIKE '%" + search_animal + "%'";
+
+                    if (!search_client_empty)
+                        query += " AND clients.name LIKE '%" + search_client + "%'";
+
+                    try {
+                        Connection con = ConnectionManager.getConnection();
+                        Statement stmt = con.createStatement();
+
+                        ResultSet rs = stmt.executeQuery(query);
+
+                        while (rs.next()) {
+                            String a_name = rs.getString("animals.name");
+                            String a_price = rs.getString("animals.price");
+
+                            String as_specie = rs.getString("animal_species.specie");
+
+                            String c_name = rs.getString("clients.name");
+                            String c_phone = rs.getString("clients.phone");
+
+                            JPanel container = new JPanel();
+                            JTextField a_name_text_field = new JTextField();
+                            JTextField a_price_text_field = new JTextField();
+                            JTextField as_specie_text_field = new JTextField();
+                            JTextField c_name_text_field = new JTextField();
+                            JTextField c_phone_text_field = new JTextField();
+
+                            a_name_text_field.setEditable(false);
+                            a_name_text_field.setText("Animal: " + a_name);
+                            a_name_text_field.setMaximumSize(new Dimension(200, 30));
+
+                            as_specie_text_field.setEditable(false);
+                            as_specie_text_field.setText("Specie: " + as_specie);
+                            as_specie_text_field.setMaximumSize(new Dimension(200, 30));
+
+                            a_price_text_field.setEditable(false);
+                            a_price_text_field.setText("Price: " + a_price);
+                            a_price_text_field.setMaximumSize(new Dimension(200, 30));
+
+                            c_name_text_field.setEditable(false);
+                            c_name_text_field.setText("Client: " + c_name);
+                            c_name_text_field.setMaximumSize(new Dimension(200, 30));
+
+                            c_phone_text_field.setEditable(false);
+                            c_phone_text_field.setText("Phone: " + c_phone);
+                            c_phone_text_field.setMaximumSize(new Dimension(200, 30));
+
+                            container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
+                            container.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
+
+                            container.add(Box.createRigidArea(new Dimension(10,0)));
+                            container.add(a_name_text_field, Component.LEFT_ALIGNMENT);
+
+                            container.add(Box.createRigidArea(new Dimension(10,0)));
+                            container.add(a_price_text_field, Component.LEFT_ALIGNMENT);
+
+                            container.add(Box.createRigidArea(new Dimension(10,0)));
+                            container.add(as_specie_text_field, Component.LEFT_ALIGNMENT);
+
+                            container.add(Box.createRigidArea(new Dimension(10,0)));
+                            container.add(c_name_text_field, Component.LEFT_ALIGNMENT);
+
+                            container.add(Box.createRigidArea(new Dimension(10,0)));
+                            container.add(c_phone_text_field, Component.LEFT_ALIGNMENT);
+
+                            ZooShop.this.panel_global_search.add(container, Component.LEFT_ALIGNMENT);
+                        }
+                    } catch (Exception ex) {
+                        System.out.println(ex);
+                    }
+                }
+
+                ZooShop.this.panel_global_search.revalidate();
+                ZooShop.this.panel_global_search.repaint();
+            }
+        });
     }
 }

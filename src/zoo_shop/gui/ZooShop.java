@@ -252,7 +252,7 @@ public class ZooShop {
                         Integer id = row.getKey();
                         Specie specie = row.getValue();
 
-                        if (!specie.getSpecie().contains(search_name)) {
+                        if (!specie.getSpecie().toLowerCase().contains(search_name.toLowerCase())) {
                             containers.get(index).setVisible(false);
                         }
                         index++;
@@ -413,7 +413,7 @@ public class ZooShop {
                             Integer id = row.getKey();
                             Animal animal = row.getValue();
 
-                            if (!animal.getName().contains(search_name)) {
+                            if (!animal.getName().toLowerCase().contains(search_name.toLowerCase())) {
                                 containers.get(index).setVisible(false);
                             }
                             index++;
@@ -542,7 +542,7 @@ public class ZooShop {
                             Integer id = row.getKey();
                             Client client = row.getValue();
 
-                            if (!client.getName().contains(search_name)) {
+                            if (!client.getName().toLowerCase().contains(search_name.toLowerCase())) {
                                 containers.get(index).setVisible(false);
                             }
                             index++;
@@ -703,7 +703,7 @@ public class ZooShop {
                             Integer id = row.getKey();
                             Adoption adoption = row.getValue();
 
-                            if (!clients.get(adoption.getClient()).getName().contains(search_name)) {
+                            if (!clients.get(adoption.getClient()).getName().toLowerCase().contains(search_name.toLowerCase())) {
                                 containers.get(index).setVisible(false);
                             }
                             index++;
